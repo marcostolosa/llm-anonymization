@@ -6,6 +6,42 @@ Sits between Claude Code and the Anthropic API. Every message, bash output, file
 
 ---
 
+## How It Works in Practice
+
+You use Claude Code exactly as you normally would — the proxy is invisible. All sensitive data is stripped before it reaches Anthropic and restored before Claude Code sees the response.
+
+```bash
+# Claude Code runs nmap and gets real output back
+$ claude
+> run nmap -sV -sC against 10.20.0.0/24 and tell me what you find
+
+# What Claude actually sees (surrogates):
+#   "Nmap scan report for srv-0042.pentest.local (203.0.113.12)"
+#   "OpenSSH 8.2 running on srv-0042.pentest.local"
+
+# What you see in your terminal (real data restored):
+#   "Nmap scan report for dc01.acmecorp.local (10.20.0.10)"
+#   "OpenSSH 8.2 running on dc01.acmecorp.local"
+```
+
+Claude reasons about the surrogates and its answers come back with surrogates too — the proxy deanonymizes them before they reach your terminal. **Claude never knows the real target name, IPs, or credentials.**
+
+### What stays protected
+
+- Every bash command output (nmap, crackmapexec, mimikatz, etc.)
+- Every file read by Claude Code
+- Every grep result, every log snippet
+- Credentials you paste into the conversation
+- Hostnames, usernames, org names you type directly
+
+### What you still need to handle
+
+- Files you share outside the Claude Code session (reports, notes)
+- Screenshots
+- Data you copy-paste into other tools
+
+---
+
 ## Architecture
 
 ```
